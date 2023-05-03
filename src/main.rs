@@ -50,8 +50,10 @@ impl EventHandler for Handler {
                     println!("Error sending message: {:?}", why);
                 }
             }
-            "!gpt" => {
-                let response = call_chat_gpt_api("tell me about the suzuki jimny").await;
+            gpt if gpt.starts_with("!gpt") => {
+                let user_input = msg.content["!gpt".len()..].trim();
+
+                let response = call_chat_gpt_api(user_input).await;
                 match response {
                     Ok(text) => {
                         if let Err(why) = msg.channel_id.say(&ctx.http, text).await {
@@ -108,7 +110,7 @@ async fn call_chat_gpt_api(
     let json_payload = serde_json::json!({
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 125,
+        "max_tokens": 1000,
         "n": 1,
         "stop": null,
         "temperature": 1,
